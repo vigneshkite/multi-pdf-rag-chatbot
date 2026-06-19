@@ -8,9 +8,8 @@ using LangChain's RecursiveCharacterTextSplitter.
 
 import os
 from langchain_community.document_loaders import PyPDFLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.schema import Document
-
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_core.documents import Document
 
 def load_pdfs(data_folder: str) -> list[Document]:
     """
