@@ -11,6 +11,7 @@ This is structured as a class so the app (Stage 5) can hold one
 instance per session and just call .ask(question).
 """
 
+from pathlib import Path
 from dotenv import load_dotenv
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
@@ -19,7 +20,10 @@ from langchain_core.output_parsers import StrOutputParser
 
 from rerank import rerank_documents
 
-load_dotenv()
+# Explicitly locate .env at the project root (one level above src/),
+# regardless of which folder this script is run from.
+env_path = Path(__file__).resolve().parent.parent / ".env"
+load_dotenv(dotenv_path=env_path)
 
 
 # Prompt to rewrite a follow-up question into a standalone one,

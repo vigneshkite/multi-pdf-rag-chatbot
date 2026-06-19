@@ -11,6 +11,7 @@ re-embed your PDFs every time you restart the app.
 """
 
 import os
+from pathlib import Path
 from dotenv import load_dotenv
 
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
@@ -19,7 +20,10 @@ from langchain_community.retrievers import BM25Retriever
 from langchain_classic.retrievers import EnsembleRetriever
 from langchain_core.documents import Document
 
-load_dotenv()  # reads GOOGLE_API_KEY from .env
+# Explicitly locate .env at the project root (one level above src/),
+# regardless of which folder this script is run from.
+env_path = Path(__file__).resolve().parent.parent / ".env"
+load_dotenv(dotenv_path=env_path)
 
 CHROMA_PERSIST_DIR = "../chroma_db"
 
