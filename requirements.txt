@@ -1,0 +1,12 @@
+langchain
+langchain-google-genai
+langchain-community
+langchain-chroma
+chromadb
+pypdf
+pymupdf
+rank_bm25
+streamlit
+python-dotenv
+tiktoken
+sentence-transformers

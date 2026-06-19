@@ -1,0 +1,20 @@
+# Environment variables (NEVER commit your API key)
+.env
+
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.Python
+
+# Vector store (regenerated from PDFs, no need to version it)
+chroma_db/
+
+# Uploaded PDFs (your own test data — don't commit copyrighted/private docs)
+data/*.pdf
+
+# OS / editor junk
+.DS_Store
+.vscode/
+*.log
