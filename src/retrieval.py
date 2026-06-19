@@ -16,8 +16,8 @@ from dotenv import load_dotenv
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_chroma import Chroma
 from langchain_community.retrievers import BM25Retriever
-from langchain.retrievers import EnsembleRetriever
-from langchain.schema import Document
+from langchain_classic.retrievers import EnsembleRetriever
+from langchain_core.documents import Document
 
 load_dotenv()  # reads GOOGLE_API_KEY from .env
 
