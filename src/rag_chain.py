@@ -100,12 +100,13 @@ class ConversationalRAGChain:
 
         print(f"[DEBUG] Standalone question sent to retriever: {repr(standalone_question)}")
 
-        # Step 2: hybrid retrieval, with retries for transient Gemini API errors
-        # (Google's free-tier embedding endpoint occasionally returns transient
-        # 500 INTERNAL errors that succeed on retry — this is a server-side
-        # flakiness issue, not a bug in our code.)
+        # Step 2: hybrid retrieval, with retries for transient Gemini API errors.
+        # NOTE: Google's free-tier API has a low requests-per-minute limit.
+        # When you exceed it, Google sometimes returns a generic 500 INTERNAL
+        # error instead of a proper 429 Too Many Requests — so we treat any
+        # failure here as "possibly rate limited" and back off accordingly.
         import time
-        max_attempts = 4
+        max_attempts = 5
         candidates = None
         last_error = None
         for attempt in range(1, max_attempts + 1):
@@ -114,16 +115,17 @@ class ConversationalRAGChain:
                 break
             except Exception as e:
                 last_error = e
-                wait = 2 ** attempt  # 2s, 4s, 8s, 16s
+                wait = 5 * attempt  # 5s, 10s, 15s, 20s, 25s — longer waits for rate limits
                 print(f"[DEBUG] Retrieval attempt {attempt}/{max_attempts} failed: {e}")
                 if attempt < max_attempts:
-                    print(f"[DEBUG] Waiting {wait}s before retrying...")
+                    print(f"[DEBUG] Waiting {wait}s before retrying (possible rate limit)...")
                     time.sleep(wait)
 
         if candidates is None:
             raise RuntimeError(
                 f"Retrieval failed after {max_attempts} attempts. "
-                f"This is likely a temporary Gemini API issue — wait a minute and try again. "
+                f"This is likely the Gemini free-tier rate limit (requests per minute). "
+                f"Wait about a minute before asking another question. "
                 f"Last error: {last_error}"
             )
 
