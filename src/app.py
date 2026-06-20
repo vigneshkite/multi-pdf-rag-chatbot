@@ -132,18 +132,30 @@ def main():
         # Generate and show assistant response
         with st.chat_message("assistant"):
             with st.spinner("Thinking..."):
-                result = st.session_state.rag_chain.ask(user_question)
-                st.markdown(result["answer"])
-                if result["sources"]:
-                    with st.expander("📖 Sources"):
-                        for source, page in result["sources"]:
-                            st.text(f"{source} — page {page}")
-
-        st.session_state.messages.append({
-            "role": "assistant",
-            "content": result["answer"],
-            "sources": result["sources"],
-        })
+                try:
+                    result = st.session_state.rag_chain.ask(user_question)
+                    st.markdown(result["answer"])
+                    if result["sources"]:
+                        with st.expander("📖 Sources"):
+                            for source, page in result["sources"]:
+                                st.text(f"{source} — page {page}")
+                    st.session_state.messages.append({
+                        "role": "assistant",
+                        "content": result["answer"],
+                        "sources": result["sources"],
+                    })
+                except Exception as e:
+                    # A flaky Gemini API call shouldn't break the whole chat session.
+                    error_msg = (
+                        "Sorry, that request hit a temporary issue with the Gemini API. "
+                        "Please try asking again."
+                    )
+                    st.error(error_msg)
+                    st.session_state.messages.append({
+                        "role": "assistant",
+                        "content": error_msg,
+                        "sources": [],
+                    })
 
 
 if __name__ == "__main__":

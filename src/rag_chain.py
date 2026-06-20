@@ -169,5 +169,11 @@ if __name__ == "__main__":
         q = input("\nYou: ")
         if q.lower() == "exit":
             break
-        result = rag_chain.ask(q)
-        print(f"\nBot: {result['answer']}")
+        try:
+            result = rag_chain.ask(q)
+            print(f"\nBot: {result['answer']}")
+        except Exception as e:
+            # Don't let one flaky API call kill the whole session —
+            # just report it and let the user try again.
+            print(f"\n[Error] That question failed: {e}")
+            print("This is usually a temporary Gemini API hiccup — just try asking again.")
