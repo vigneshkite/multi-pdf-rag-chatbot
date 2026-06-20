@@ -7,7 +7,7 @@ together for much more precise relevance than embedding similarity alone.
 """
 
 from sentence_transformers import CrossEncoder
-from langchain.schema import Document
+from langchain_core.documents import Document
 
 # Loaded once and reused (loading the model is the slow part, ~few seconds)
 _cross_encoder = None
