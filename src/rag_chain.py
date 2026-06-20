@@ -98,8 +98,16 @@ class ConversationalRAGChain:
         else:
             standalone_question = question
 
-        # Step 2: hybrid retrieval
-        candidates = self.retriever.invoke(standalone_question)
+        print(f"[DEBUG] Standalone question sent to retriever: {repr(standalone_question)}")
+
+        # Step 2: hybrid retrieval (with one retry for transient API errors)
+        try:
+            candidates = self.retriever.invoke(standalone_question)
+        except Exception as e:
+            print(f"[DEBUG] First retrieval attempt failed: {e}\nRetrying once...")
+            import time
+            time.sleep(2)
+            candidates = self.retriever.invoke(standalone_question)
 
         # Step 3: re-rank candidates, keep only the best
         top_docs = rerank_documents(standalone_question, candidates, top_n=self.rerank_top_n)
