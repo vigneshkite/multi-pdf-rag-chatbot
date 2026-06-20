@@ -100,14 +100,32 @@ class ConversationalRAGChain:
 
         print(f"[DEBUG] Standalone question sent to retriever: {repr(standalone_question)}")
 
-        # Step 2: hybrid retrieval (with one retry for transient API errors)
-        try:
-            candidates = self.retriever.invoke(standalone_question)
-        except Exception as e:
-            print(f"[DEBUG] First retrieval attempt failed: {e}\nRetrying once...")
-            import time
-            time.sleep(2)
-            candidates = self.retriever.invoke(standalone_question)
+        # Step 2: hybrid retrieval, with retries for transient Gemini API errors
+        # (Google's free-tier embedding endpoint occasionally returns transient
+        # 500 INTERNAL errors that succeed on retry — this is a server-side
+        # flakiness issue, not a bug in our code.)
+        import time
+        max_attempts = 4
+        candidates = None
+        last_error = None
+        for attempt in range(1, max_attempts + 1):
+            try:
+                candidates = self.retriever.invoke(standalone_question)
+                break
+            except Exception as e:
+                last_error = e
+                wait = 2 ** attempt  # 2s, 4s, 8s, 16s
+                print(f"[DEBUG] Retrieval attempt {attempt}/{max_attempts} failed: {e}")
+                if attempt < max_attempts:
+                    print(f"[DEBUG] Waiting {wait}s before retrying...")
+                    time.sleep(wait)
+
+        if candidates is None:
+            raise RuntimeError(
+                f"Retrieval failed after {max_attempts} attempts. "
+                f"This is likely a temporary Gemini API issue — wait a minute and try again. "
+                f"Last error: {last_error}"
+            )
 
         # Step 3: re-rank candidates, keep only the best
         top_docs = rerank_documents(standalone_question, candidates, top_n=self.rerank_top_n)
