@@ -9,7 +9,6 @@ Run with: streamlit run app.py
 """
 
 import os
-import shutil
 import streamlit as st
 
 from ingest import ingest_pdfs
@@ -53,12 +52,15 @@ def build_pipeline():
         chunks = ingest_pdfs(data_folder=DATA_DIR)
 
     with st.spinner("Embedding chunks with Gemini (this may take a moment)..."):
-        # Fresh build each time files change; for a persistent-across-restarts
-        # version, you could check CHROMA_DIR and call load_existing_vector_store
-        # instead, as long as the PDF set hasn't changed.
-        if os.path.exists(CHROMA_DIR):
-            shutil.rmtree(CHROMA_DIR)
-        vector_store = build_vector_store(chunks, persist_directory=CHROMA_DIR)
+        # Use a fresh, uniquely-named directory for each build instead of
+        # deleting the old one. On Windows, the previous Chroma SQLite file
+        # can stay locked by the OS/another process briefly after use, which
+        # makes shutil.rmtree() fail with PermissionError. Using a new folder
+        # each time sidesteps that entirely — old folders are harmless and
+        # can be cleaned up later if disk space matters.
+        import time
+        unique_chroma_dir = f"{CHROMA_DIR}_{int(time.time())}"
+        vector_store = build_vector_store(chunks, persist_directory=unique_chroma_dir)
 
     with st.spinner("Setting up hybrid retrieval..."):
         hybrid_retriever = build_hybrid_retriever(chunks, vector_store)
