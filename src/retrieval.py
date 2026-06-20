@@ -30,10 +30,12 @@ CHROMA_PERSIST_DIR = "../chroma_db"
 
 def get_embeddings_model():
     """
-    Gemini's embedding model. 'models/embedding-001' converts text
+    Gemini's embedding model. 'models/gemini-embedding-001' converts text
     into a high-dimensional vector capturing semantic meaning.
+    (Note: the older 'models/embedding-001' was retired by Google;
+    gemini-embedding-001 is the current generally-available model.)
     """
-    return GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+    return GoogleGenerativeAIEmbeddings(model="models/gemini-embedding-001")
 
 
 def build_vector_store(chunks: list[Document], persist_directory: str = CHROMA_PERSIST_DIR) -> Chroma:

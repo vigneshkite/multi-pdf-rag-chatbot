@@ -57,12 +57,13 @@ ANSWER_PROMPT = ChatPromptTemplate.from_messages([
 
 
 class ConversationalRAGChain:
-    def __init__(self, hybrid_retriever, model_name: str = "gemini-1.5-flash", rerank_top_n: int = 4):
+    def __init__(self, hybrid_retriever, model_name: str = "gemini-2.5-flash", rerank_top_n: int = 4):
         """
         hybrid_retriever: the EnsembleRetriever from retrieval.py
         model_name: Gemini model to use for both query rewriting and answering.
-                    gemini-1.5-flash is fast and cheap — great default.
-                    Use gemini-1.5-pro for harder reasoning if needed.
+                    gemini-2.5-flash is fast, cheap, and current as of mid-2026
+                    (the older gemini-1.5-flash has been fully deprecated/shut down).
+                    Use gemini-2.5-pro for harder reasoning if needed.
         rerank_top_n: how many chunks survive re-ranking before going to the LLM
         """
         self.retriever = hybrid_retriever
